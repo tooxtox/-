@@ -1,0 +1,6 @@
+opencv-python==4.8.1.78
+numpy==1.24.3
+flask==3.0.0
+werkzeug==3.0.1
+ultralytics==8.0.196
+pillow==10.1.0

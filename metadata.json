@@ -1,0 +1,14 @@
+{
+    "name": "智能监控插件",
+    "version": "1.0.0",
+    "description": "AstrBot智能监控系统插件，支持人脸识别、人体检测、敏感区域监控",
+    "author": "CRAIC",
+    "main": "main",
+    "platforms": ["craic_surveillance"],
+    "dependencies": {
+        "opencv-python": ">=4.8.0",
+        "numpy": ">=1.24.0",
+        "ultralytics": ">=8.0.0",
+        "flask": ">=3.0.0"
+    }
+}
