@@ -486,7 +486,7 @@ class ZoneManager:
     def __init__(self):
         self.zones = []
         self.last_zone_alert_time = {}
-        self.zone_cooldown_seconds = 60
+        self.zone_cooldown_seconds = 10
 
     def add_zone(self, name, points, zone_type="polygon"):
         self.zones.append({"name": name, "points": points, "type": zone_type})
@@ -537,44 +537,45 @@ class AlertManager:
         self.last_alert_time = {}
         self.last_sensitive_zone_alert_time = None
         self.last_llm_image_time = None
-        self.cooldown_seconds = 60
-        self.sensitive_zone_cooldown_seconds = 30
+        self.cooldown_seconds = 10
+        self.sensitive_zone_cooldown_seconds = 10
         self.llm_image_cooldown_seconds = 30
 
     def can_call_llm_image(self):
+        """检查是否可以调用 LLM 图片描述"""
         now = datetime.now()
         if self.last_llm_image_time:
             time_since_last = (now - self.last_llm_image_time).total_seconds()
             if time_since_last < self.llm_image_cooldown_seconds:
+                print("[警报] LLM 图片描述冷却中，跳过调用")
                 return False
         self.last_llm_image_time = now
         return True
 
-    def can_alert_sensitive_zone(self):
-        now = datetime.now()
-        if self.last_sensitive_zone_alert_time:
-            time_since_last = (
-                now - self.last_sensitive_zone_alert_time
-            ).total_seconds()
-            if time_since_last < self.sensitive_zone_cooldown_seconds:
-                return False
-        self.last_sensitive_zone_alert_time = now
-        return True
-
-    def add_alert(
-        self, alert_type, message, person=None, is_sensitive_zone=False
-    ):
+    def add_alert(self, alert_type, message, person="unknown", is_sensitive_zone=False):
         now = datetime.now()
         alert_key = f"{alert_type}:{message}:{person}"
 
-        if alert_key in self.last_alert_time:
-            time_since_last = (now - self.last_alert_time[alert_key]).total_seconds()
-            if time_since_last < self.cooldown_seconds:
-                return None
-
-        for existing in self.alerts[:5]:
-            if existing["message"] == message:
-                return None
+        # 敏感区域共用冷却时间
+        if is_sensitive_zone:
+            if self.last_sensitive_zone_alert_time:
+                time_since_last = (
+                    now - self.last_sensitive_zone_alert_time
+                ).total_seconds()
+                if time_since_last < self.sensitive_zone_cooldown_seconds:
+                    print(f"[警报] 敏感区域冷却中，跳过所有警报: {message}")
+                    return None
+            # 更新敏感区域最后警报时间
+            self.last_sensitive_zone_alert_time = now
+        else:
+            # 普通警报使用单独冷却时间
+            if alert_key in self.last_alert_time:
+                time_since_last = (
+                    now - self.last_alert_time[alert_key]
+                ).total_seconds()
+                if time_since_last < self.cooldown_seconds:
+                    print(f"[警报] 冷却中，跳过重复警报: {message}")
+                    return None
 
         alert = {
             "type": alert_type,
