@@ -40,8 +40,12 @@ CRAIC (Smart Surveillance System) 是一个基于AstrBot的智能监控系统插
 ### 安装步骤
 
 ```bash
-# 克隆或下载插件
-cd CRAIC
+# 从GitHub克隆插件
+git clone https://github.com/tooxtox/-.git
+cd -
+
+# 或者下载ZIP包并解压
+# 访问 https://github.com/tooxtox/- 下载最新版本
 
 # 安装Python依赖
 pip install -r requirements.txt
